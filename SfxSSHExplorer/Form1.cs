@@ -54,21 +54,7 @@ namespace SfxSSHExplorer
                 MessageBox.Show("连接失败!" + ex.Message + ex.StackTrace);
             }
         }
-        private async System.Threading.Tasks.Task listAsync()
-        {
-           
-            // await a directory listing
-            //var listing = await client.ListDirectoryAsync(".");
-
-            //// await a file upload
-            //using (var localStream = File.OpenRead("path_to_local_file"))
-            //{
-            //    await client.UploadAsync(localStream, "upload_path");
-            //}
-
-            // disconnect like you normally would
-       
-        }
+     
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -104,6 +90,10 @@ namespace SfxSSHExplorer
 
                                     destPath.Replace(".", "");
                                 }
+                            }
+                            if (destPath == "." || !file.IsDirectory)
+                            {
+                                destPath = (tvDir.Nodes[0].FirstNode.Tag as SftpFile).FullName.Replace(".", "");
                             }
                             await client.UploadAsync(localStream, destPath + openFileDialog1.SafeFileName);
                             refresh();
@@ -184,8 +174,11 @@ namespace SfxSSHExplorer
             }
         }
 
-        private void 下载此文件ToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void 下载此文件ToolStripMenuItem_ClickAsync(object sender, EventArgs e)
         {
+            SftpFile file = (SftpFile)tvDir.SelectedNode.Tag;
+            if (file == null) return;
+            this.saveFileDialog1.FileName = file.Name;
             this.saveFileDialog1.Title = "保存文件到";
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
@@ -196,15 +189,19 @@ namespace SfxSSHExplorer
                     try
                     {
                         client.Connect();
-                        SftpFile file = (SftpFile)tvDir.SelectedNode.Tag;
+                  
                         if (file.IsRegularFile)
                         {
-
+                            
                             using (var saveFile = File.OpenWrite(this.saveFileDialog1.FileName))
                             {
-                                client.DownloadAsync(file.FullName, saveFile);
-                                MessageBox.Show("下载成功！");
+                                await client.DownloadAsync(file.FullName, saveFile);
+                                
                             }
+                        }
+                        else
+                        {
+                            MessageBox.Show("只允许下载单个文件！");
                         }
                     }
                     catch (Exception ex)

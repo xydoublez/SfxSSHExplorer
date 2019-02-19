@@ -191,33 +191,33 @@
             this.删除此文件ToolStripMenuItem,
             this.移动至ToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 114);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(161, 92);
             // 
             // 上传到此文件夹ToolStripMenuItem
             // 
             this.上传到此文件夹ToolStripMenuItem.Name = "上传到此文件夹ToolStripMenuItem";
-            this.上传到此文件夹ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.上传到此文件夹ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.上传到此文件夹ToolStripMenuItem.Text = "上传到此文件夹";
             this.上传到此文件夹ToolStripMenuItem.Click += new System.EventHandler(this.上传到此文件夹ToolStripMenuItem_ClickAsync);
             // 
             // 下载此文件ToolStripMenuItem
             // 
             this.下载此文件ToolStripMenuItem.Name = "下载此文件ToolStripMenuItem";
-            this.下载此文件ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.下载此文件ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.下载此文件ToolStripMenuItem.Text = "下载此文件";
-            this.下载此文件ToolStripMenuItem.Click += new System.EventHandler(this.下载此文件ToolStripMenuItem_Click);
+            this.下载此文件ToolStripMenuItem.Click += new System.EventHandler(this.下载此文件ToolStripMenuItem_ClickAsync);
             // 
             // 删除此文件ToolStripMenuItem
             // 
             this.删除此文件ToolStripMenuItem.Name = "删除此文件ToolStripMenuItem";
-            this.删除此文件ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.删除此文件ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.删除此文件ToolStripMenuItem.Text = "删除此文件";
             this.删除此文件ToolStripMenuItem.Click += new System.EventHandler(this.删除此文件ToolStripMenuItem_Click);
             // 
             // 移动至ToolStripMenuItem
             // 
             this.移动至ToolStripMenuItem.Name = "移动至ToolStripMenuItem";
-            this.移动至ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.移动至ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.移动至ToolStripMenuItem.Text = "移动至";
             // 
             // txtPath
@@ -231,6 +231,10 @@
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
+            // 
+            // saveFileDialog1
+            // 
+            this.saveFileDialog1.Filter = "所有文件|*.*";
             // 
             // Form1
             // 
