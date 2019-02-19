@@ -57,6 +57,8 @@
             this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.lvFiles = new System.Windows.Forms.ListView();
+            this.label5 = new System.Windows.Forms.Label();
+            this.属性ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             this.contextMenuStrip2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -194,9 +196,10 @@
             this.上传到此文件夹ToolStripMenuItem,
             this.下载此文件ToolStripMenuItem,
             this.删除此文件ToolStripMenuItem,
-            this.移动至ToolStripMenuItem});
+            this.移动至ToolStripMenuItem,
+            this.属性ToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(161, 92);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 136);
             // 
             // 上传到此文件夹ToolStripMenuItem
             // 
@@ -222,8 +225,9 @@
             // 移动至ToolStripMenuItem
             // 
             this.移动至ToolStripMenuItem.Name = "移动至ToolStripMenuItem";
-            this.移动至ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.移动至ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.移动至ToolStripMenuItem.Text = "移动至";
+            this.移动至ToolStripMenuItem.Click += new System.EventHandler(this.移动至ToolStripMenuItem_Click);
             // 
             // txtPath
             // 
@@ -232,6 +236,7 @@
             this.txtPath.Size = new System.Drawing.Size(659, 21);
             this.txtPath.TabIndex = 11;
             this.txtPath.Text = ".";
+            this.txtPath.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtPath_KeyDown);
             // 
             // openFileDialog1
             // 
@@ -265,26 +270,30 @@
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(160, 22);
             this.toolStripMenuItem1.Text = "上传到此文件夹";
+            this.toolStripMenuItem1.Click += new System.EventHandler(this.toolStripMenuItem1_ClickAsync);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(180, 22);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(160, 22);
             this.toolStripMenuItem2.Text = "下载此文件";
+            this.toolStripMenuItem2.Click += new System.EventHandler(this.toolStripMenuItem2_ClickAsync);
             // 
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(180, 22);
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(160, 22);
             this.toolStripMenuItem3.Text = "删除此文件";
+            this.toolStripMenuItem3.Click += new System.EventHandler(this.toolStripMenuItem3_Click);
             // 
             // toolStripMenuItem4
             // 
             this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(180, 22);
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(160, 22);
             this.toolStripMenuItem4.Text = "移动至";
+            this.toolStripMenuItem4.Click += new System.EventHandler(this.toolStripMenuItem4_Click);
             // 
             // splitContainer1
             // 
@@ -310,6 +319,7 @@
             this.lvFiles.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.lvFiles.ContextMenuStrip = this.contextMenuStrip2;
             this.lvFiles.Location = new System.Drawing.Point(3, 3);
             this.lvFiles.Name = "lvFiles";
             this.lvFiles.Size = new System.Drawing.Size(591, 360);
@@ -317,12 +327,32 @@
             this.lvFiles.TabIndex = 10;
             this.lvFiles.UseCompatibleStateImageBehavior = false;
             this.lvFiles.View = System.Windows.Forms.View.List;
+            this.lvFiles.DoubleClick += new System.EventHandler(this.lvFiles_DoubleClick);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("宋体", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label5.ForeColor = System.Drawing.Color.Blue;
+            this.label5.Location = new System.Drawing.Point(11, 67);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(69, 20);
+            this.label5.TabIndex = 15;
+            this.label5.Text = "路径：";
+            // 
+            // 属性ToolStripMenuItem
+            // 
+            this.属性ToolStripMenuItem.Name = "属性ToolStripMenuItem";
+            this.属性ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.属性ToolStripMenuItem.Text = "属性";
+            this.属性ToolStripMenuItem.Click += new System.EventHandler(this.属性ToolStripMenuItem_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(967, 498);
+            this.Controls.Add(this.label5);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.txtPath);
@@ -379,6 +409,8 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.ListView lvFiles;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.ToolStripMenuItem 属性ToolStripMenuItem;
     }
 }
 

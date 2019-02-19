@@ -56,7 +56,7 @@ namespace SfxSSHExplorer
             }
             catch (Exception ex)
             {
-                MessageBox.Show("连接失败!" + ex.Message + ex.StackTrace);
+                MessageBox.Show("没有权限或路径不正确!" + ex.Message + ex.StackTrace);
             }
         }
 
@@ -109,16 +109,18 @@ namespace SfxSSHExplorer
                         //await client.UploadAsync(localStream, file.Name);
                       
                         System.Diagnostics.Trace.WriteLine("上传进度!");
+                        double max = (double)localStream.Length;
                         System.Diagnostics.Trace.WriteLine(localStream.Length);
                         this.progressBar1.Show();
-                        this.progressBar1.Maximum = (int)localStream.Length;
+                        this.progressBar1.Maximum = 100;
+
                         await client.UploadAsync(localStream, destPath + openFileDialog1.SafeFileName, new Action<ulong>((o) =>
                         {
                             System.Diagnostics.Trace.WriteLine(o);
                             this.Invoke(new Action(() =>
                             {
-                                this.progressBar1.Value = (int)o;
-                                if (o == (ulong)localStream.Length)
+                                this.progressBar1.Value = (int)(((double)o/max)*100);
+                                if ((double)o == max)
                                 {
                                     MessageBox.Show("上传完成");
                                     this.progressBar1.Hide();
@@ -232,14 +234,15 @@ namespace SfxSSHExplorer
 
                         using (var saveFile = File.OpenWrite(destFile))
                         {
-                            this.progressBar1.Maximum = (int)file.Length;
+                            double max = (double)file.Length;
+                            this.progressBar1.Maximum = 100;
                             this.progressBar1.Show();
                             await client.DownloadAsync(file.FullName, saveFile, new Action<ulong>((o) =>
                             {
                                 this.Invoke(new Action(() =>
                                 {
-                                    this.progressBar1.Value = (int) o;
-                                    if ((ulong)file.Length == o)
+                                    this.progressBar1.Value = (int)(((double)o / max) * 100);
+                                    if ((double)o == max)
                                     {
                                         MessageBox.Show("下载完成!");
                                         this.progressBar1.Hide();
@@ -264,8 +267,201 @@ namespace SfxSSHExplorer
 
         private void lvFiles_MouseDoubleClick(object sender, MouseEventArgs e)
         {
+           
+
+        }
+
+        private async void  toolStripMenuItem2_ClickAsync(object sender, EventArgs e)
+        {
+            SftpFile file = lvFiles.FocusedItem.Tag as SftpFile;
+            if (file == null) return;
+            this.saveFileDialog1.FileName = file.Name;
+            this.saveFileDialog1.Title = "下载文件，保存至";
+            this.saveFileDialog1.DefaultExt = System.IO.Path.GetExtension(file.Name);
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                await downloadAsync(file, this.saveFileDialog1.FileName);
+            }
+        }
+
+        private void toolStripMenuItem3_Click(object sender, EventArgs e)
+        {
+            SftpFile file = lvFiles.FocusedItem.Tag as SftpFile;
+            if (file == null) return;
+            if (MessageBox.Show("确定要删除此文件？", "提示", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                var connectionInfo = new ConnectionInfo(txtIp.Text, int.Parse(txtPort.Text), txtUser.Text, new PasswordAuthenticationMethod(txtUser.Text, txtPassword.Text));
+
+                using (var client = new SftpClient(connectionInfo))
+                {
+                    try
+                    {
+                        client.Connect();
+                        if (file.IsRegularFile)
+                        {
+                            client.Delete(file.FullName);
+                            MessageBox.Show("删除成功！");
+                            refresh();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("删除失败" + ex.Message);
+                    }
+
+                }
+            }
+        }
+
+        private void toolStripMenuItem4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private async void toolStripMenuItem1_ClickAsync(object sender, EventArgs e)
+        {
+            this.openFileDialog1.Title = "请选择要上传的文件";
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                SftpFile file = lvFiles.FocusedItem.Tag as SftpFile;
+                var destPath = txtPath.Text;
+                if (file != null)
+                {
+                    destPath = file.FullName;
+                    if (file.Name == "." || file.Name == "..")
+                    {
+
+                        destPath.Replace(".", "");
+                    }
+                }
+                //if (destPath == "." || !file.IsDirectory)
+                //{
+                //    destPath = (tvDir.Nodes[0].FirstNode.Tag as SftpFile).FullName.Replace(".", "");
+                //}
+                await uploadAsync(file, destPath);
+            }
+
+        }
+
+        private void lvFiles_DoubleClick(object sender, EventArgs e)
+        {
             SftpFile file = lvFiles.FocusedItem.Tag as SftpFile;
             viewDir(file.FullName);
+        }
+
+        private void txtPath_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                this.button1_ClickAsync(sender, e);
+            }
+        }
+
+        private void 属性ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SftpFile file = (SftpFile)tvDir.SelectedNode.Tag;
+            if (file == null) return;
+            FileProperty fileProperty = new FileProperty();
+            fileProperty.Size = (file.Attributes.Size / 1024 / 1024).ToString();
+            fileProperty.Date = file.Attributes.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss");
+            fileProperty.Owner = file.Attributes.UserId.ToString();
+            fileProperty.Group = file.Attributes.GroupId.ToString();
+            fileProperty.Access = getAccess(file);
+
+
+
+            FrmPropertiy frm = new FrmPropertiy(fileProperty);
+            frm.ShowDialog();
+        }
+        private string getAccess(SftpFile file)
+        {
+            string re = "";
+            if (file.IsDirectory)
+            {
+                re += "d";
+            }
+            else
+            {
+                re += "-";
+            }
+            if (file.OwnerCanRead)
+            {
+                re += "r";
+            }
+            else
+            {
+                re += "-";
+            }
+            if (file.OwnerCanWrite)
+            {
+                re += "w";
+            }
+            else
+            {
+                re += "-";
+            }
+            if (file.OwnerCanExecute)
+            {
+                re += "x";
+            }
+            else
+            {
+                re += "-";
+            }
+            if (file.GroupCanRead)
+            {
+                re += "r";
+            }
+            else
+            {
+                re += "-";
+            }
+            if (file.GroupCanWrite)
+            {
+                re += "w";
+            }
+            else
+            {
+                re += "-";
+            }
+            if (file.GroupCanExecute)
+            {
+                re += "x";
+            }
+            else
+            {
+                re += "-";
+            }
+
+            if (file.OthersCanRead)
+            {
+                re += "r";
+            }
+            else
+            {
+                re += "-";
+            }
+            if (file.OthersCanWrite)
+            {
+                re += "w";
+            }
+            else
+            {
+                re += "-";
+            }
+            if (file.OthersCanExecute)
+            {
+                re += "x";
+            }
+            else
+            {
+                re += "-";
+            }
+            return re;
+        }
+
+        private void 移动至ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
 
         }
     }
