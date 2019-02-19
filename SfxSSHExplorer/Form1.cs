@@ -1,4 +1,5 @@
-﻿using Renci.SshNet;
+﻿
+using Renci.SshNet;
 using Renci.SshNet.Async;
 using Renci.SshNet.Sftp;
 using System;
@@ -7,18 +8,22 @@ using System.Windows.Forms;
 
 namespace SfxSSHExplorer
 {
+    /// <summary>
+    /// linux ssh简单文件浏览器
+    /// 创建标识： 李志强  2019-02-19 
+    /// </summary>
     public partial class Form1 : Form
     {
-     
+
         public Form1()
         {
             InitializeComponent();
         }
 
-        private  void  button1_ClickAsync(object sender, EventArgs e)
+        private void button1_ClickAsync(object sender, EventArgs e)
         {
             refresh();
-            
+
         }
         private void refresh()
         {
@@ -29,8 +34,8 @@ namespace SfxSSHExplorer
                 using (var client = new SftpClient(connectionInfo))
                 {
                     client.Connect();
-                    var list  = client.ListDirectoryAsync(txtPath.Text);
-                    
+                    var list = client.ListDirectoryAsync(txtPath.Text);
+
                     TreeNode root = new TreeNode(txtUser.Text + ":根结点");
                     foreach (var item in list.Result)
                     {
@@ -49,87 +54,93 @@ namespace SfxSSHExplorer
                     tvDir.ExpandAll();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show("连接失败!" + ex.Message + ex.StackTrace);
             }
         }
-     
+
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
- 
+
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-          
+
         }
 
-        private async   void 上传到此文件夹ToolStripMenuItem_ClickAsync(object sender, EventArgs e)
+        private async void  上传到此文件夹ToolStripMenuItem_ClickAsync(object sender, EventArgs e)
         {
             this.openFileDialog1.Title = "请选择要上传的文件";
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                try
+                SftpFile file = (SftpFile)tvDir.SelectedNode.Tag;
+                var destPath = txtPath.Text;
+                if (file != null)
                 {
-                    SftpFile file = (SftpFile)tvDir.SelectedNode.Tag;
-                    var connectionInfo = new ConnectionInfo(txtIp.Text, int.Parse(txtPort.Text), txtUser.Text, new PasswordAuthenticationMethod(txtUser.Text, txtPassword.Text));
-                    using (var client = new SftpClient(connectionInfo))
+                    destPath = file.FullName;
+                    if (file.Name == "." || file.Name == "..")
                     {
-                        client.Connect();
-                        using (var localStream = File.OpenRead(openFileDialog1.FileName))
-                        {
-                            //await client.UploadAsync(localStream, file.Name);
-                            var destPath = txtPath.Text;
-                            if (file != null)
-                            {
-                                destPath = file.FullName;
-                                if (file.Name == "." || file.Name == "..")
-                                {
 
-                                    destPath.Replace(".", "");
-                                }
-                            }
-                            if (destPath == "." || !file.IsDirectory)
-                            {
-                                destPath = (tvDir.Nodes[0].FirstNode.Tag as SftpFile).FullName.Replace(".", "");
-                            }
-                            System.Diagnostics.Trace.WriteLine("上传进度!");
-                            System.Diagnostics.Trace.WriteLine(localStream.Length);
-                            this.progressBar1.Show();
-                            this.progressBar1.Maximum = (int) localStream.Length;
-                            await client.UploadAsync(localStream, destPath + openFileDialog1.SafeFileName, new Action<ulong>((o)=> {
-                                System.Diagnostics.Trace.WriteLine(o);
-                                this.Invoke(new Action(() => {
-                                    this.progressBar1.Value =(int) o;
-                                    if (o == (ulong)localStream.Length)
-                                    {
-                                        MessageBox.Show("上传完成");
-                                        this.progressBar1.Hide();
-                                    }
-                                }));
-                               
-                            }));
-                            refresh();
-
-                           
-
-
-                        }
-
+                        destPath.Replace(".", "");
                     }
-                }catch(Exception ex)
+                }
+                if (destPath == "." || !file.IsDirectory)
                 {
-                    MessageBox.Show(ex.Message + ex.StackTrace);
+                    destPath = (tvDir.Nodes[0].FirstNode.Tag as SftpFile).FullName.Replace(".", "");
+                }
+                await uploadAsync(file, destPath);
+            }
+
+        }
+        private async System.Threading.Tasks.Task uploadAsync(SftpFile file,string destPath)
+        {
+            try
+            {
+               
+                var connectionInfo = new ConnectionInfo(txtIp.Text, int.Parse(txtPort.Text), txtUser.Text, new PasswordAuthenticationMethod(txtUser.Text, txtPassword.Text));
+                using (var client = new SftpClient(connectionInfo))
+                {
+                    client.Connect();
+                    using (var localStream = File.OpenRead(openFileDialog1.FileName))
+                    {
+                        //await client.UploadAsync(localStream, file.Name);
+                      
+                        System.Diagnostics.Trace.WriteLine("上传进度!");
+                        System.Diagnostics.Trace.WriteLine(localStream.Length);
+                        this.progressBar1.Show();
+                        this.progressBar1.Maximum = (int)localStream.Length;
+                        await client.UploadAsync(localStream, destPath + openFileDialog1.SafeFileName, new Action<ulong>((o) =>
+                        {
+                            System.Diagnostics.Trace.WriteLine(o);
+                            this.Invoke(new Action(() =>
+                            {
+                                this.progressBar1.Value = (int)o;
+                                if (o == (ulong)localStream.Length)
+                                {
+                                    MessageBox.Show("上传完成");
+                                    this.progressBar1.Hide();
+                                }
+                            }));
+
+                        }));
+                        refresh();
+                    }
+
                 }
             }
-            
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message + ex.StackTrace);
+            }
         }
-  
+
         private void viewDir(string dir)
         {
             lvFiles.Items.Clear();
+            txtPath.Text = dir;
             var connectionInfo = new ConnectionInfo(txtIp.Text, int.Parse(txtPort.Text), txtUser.Text, new PasswordAuthenticationMethod(txtUser.Text, txtPassword.Text));
 
             using (var client = new SftpClient(connectionInfo))
@@ -149,7 +160,8 @@ namespace SfxSSHExplorer
 
                         lvFiles.Items.Add(p);
                     }
-                }catch(Exception ex)
+                }
+                catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message);
                 }
@@ -158,7 +170,9 @@ namespace SfxSSHExplorer
 
         private void tvDir_DoubleClick(object sender, EventArgs e)
         {
+            
             SftpFile file = (SftpFile)tvDir.SelectedNode.Tag;
+            if (file == null) return;
             viewDir(file.FullName);
 
         }
@@ -196,38 +210,63 @@ namespace SfxSSHExplorer
             SftpFile file = (SftpFile)tvDir.SelectedNode.Tag;
             if (file == null) return;
             this.saveFileDialog1.FileName = file.Name;
-            this.saveFileDialog1.Title = "保存文件到";
+            this.saveFileDialog1.Title = "下载文件，保存至";
+            this.saveFileDialog1.DefaultExt = System.IO.Path.GetExtension(file.Name);
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                var connectionInfo = new ConnectionInfo(txtIp.Text, int.Parse(txtPort.Text), txtUser.Text, new PasswordAuthenticationMethod(txtUser.Text, txtPassword.Text));
-
-                using (var client = new SftpClient(connectionInfo))
-                {
-                    try
-                    {
-                        client.Connect();
-                  
-                        if (file.IsRegularFile)
-                        {
-                            
-                            using (var saveFile = File.OpenWrite(this.saveFileDialog1.FileName))
-                            {
-                                await client.DownloadAsync(file.FullName, saveFile);
-                                
-                            }
-                        }
-                        else
-                        {
-                            MessageBox.Show("只允许下载单个文件！");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("下载失败" + ex.Message);
-                    }
-
-                }
+                await downloadAsync(file, this.saveFileDialog1.FileName);
             }
+        }
+        private async System.Threading.Tasks.Task downloadAsync(SftpFile file,string destFile)
+        {
+            var connectionInfo = new ConnectionInfo(txtIp.Text, int.Parse(txtPort.Text), txtUser.Text, new PasswordAuthenticationMethod(txtUser.Text, txtPassword.Text));
+
+            using (var client = new SftpClient(connectionInfo))
+            {
+                try
+                {
+                    client.Connect();
+
+                    if (file.IsRegularFile)
+                    {
+
+                        using (var saveFile = File.OpenWrite(destFile))
+                        {
+                            this.progressBar1.Maximum = (int)file.Length;
+                            this.progressBar1.Show();
+                            await client.DownloadAsync(file.FullName, saveFile, new Action<ulong>((o) =>
+                            {
+                                this.Invoke(new Action(() =>
+                                {
+                                    this.progressBar1.Value = (int) o;
+                                    if ((ulong)file.Length == o)
+                                    {
+                                        MessageBox.Show("下载完成!");
+                                        this.progressBar1.Hide();
+                                    }
+                                }));
+                            }));
+
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("只允许下载单个文件！");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("下载失败" + ex.Message);
+                }
+
+            }
+        }
+
+        private void lvFiles_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            SftpFile file = lvFiles.FocusedItem.Tag as SftpFile;
+            viewDir(file.FullName);
+
         }
     }
 }
