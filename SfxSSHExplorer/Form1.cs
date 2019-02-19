@@ -95,8 +95,25 @@ namespace SfxSSHExplorer
                             {
                                 destPath = (tvDir.Nodes[0].FirstNode.Tag as SftpFile).FullName.Replace(".", "");
                             }
-                            await client.UploadAsync(localStream, destPath + openFileDialog1.SafeFileName);
+                            System.Diagnostics.Trace.WriteLine("上传进度!");
+                            System.Diagnostics.Trace.WriteLine(localStream.Length);
+                            this.progressBar1.Show();
+                            this.progressBar1.Maximum = (int) localStream.Length;
+                            await client.UploadAsync(localStream, destPath + openFileDialog1.SafeFileName, new Action<ulong>((o)=> {
+                                System.Diagnostics.Trace.WriteLine(o);
+                                this.Invoke(new Action(() => {
+                                    this.progressBar1.Value =(int) o;
+                                    if (o == (ulong)localStream.Length)
+                                    {
+                                        MessageBox.Show("上传完成");
+                                        this.progressBar1.Hide();
+                                    }
+                                }));
+                               
+                            }));
                             refresh();
+
+                           
 
 
                         }

@@ -50,6 +50,7 @@
             this.txtPath = new System.Windows.Forms.TextBox();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -142,7 +143,7 @@
             // 
             // lvFiles
             // 
-            this.lvFiles.Location = new System.Drawing.Point(323, 128);
+            this.lvFiles.Location = new System.Drawing.Point(296, 102);
             this.lvFiles.Name = "lvFiles";
             this.lvFiles.Size = new System.Drawing.Size(539, 353);
             this.lvFiles.SmallImageList = this.imageList1;
@@ -176,7 +177,7 @@
             this.tvDir.ContextMenuStrip = this.contextMenuStrip1;
             this.tvDir.ImageIndex = 0;
             this.tvDir.ImageList = this.imageList1;
-            this.tvDir.Location = new System.Drawing.Point(56, 119);
+            this.tvDir.Location = new System.Drawing.Point(56, 93);
             this.tvDir.Name = "tvDir";
             this.tvDir.SelectedImageIndex = 0;
             this.tvDir.Size = new System.Drawing.Size(185, 362);
@@ -236,11 +237,20 @@
             // 
             this.saveFileDialog1.Filter = "所有文件|*.*";
             // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(56, 462);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(779, 23);
+            this.progressBar1.TabIndex = 12;
+            this.progressBar1.Visible = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(958, 493);
+            this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.txtPath);
             this.Controls.Add(this.tvDir);
             this.Controls.Add(this.lvFiles);
@@ -285,6 +295,7 @@
         private System.Windows.Forms.ToolStripMenuItem 移动至ToolStripMenuItem;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
+        private System.Windows.Forms.ProgressBar progressBar1;
     }
 }
 
